@@ -1,0 +1,197 @@
+---
+title: "HW: Getting familiar with `ggplot2`"
+author: "Kyle Dean"
+output: html_notebook
+---
+
+Load the `tidyverse` package
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+
+# Problem 1
+
+You will use the `diamonds` dataset that comes with `ggplot2` (already loaded when you use `library(tidyverse`)). You can explore the dataset by using the function `str()`:
+
+```{r}
+str(diamonds)
+```
+
+
+
+(a) Create a bar-plot using `geom_bar()`, mapping the `clarity` to the `x` aesthetic, and `cut` to the `fill` aesthetic. What do you notice?
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = clarity, fill = cut))
+```
+Here we can see the different types of clarity on the X axis and the Y axis showing the number of entries in the dataset. The bars themselves are filled with the separate number of different cuts found with each type of clarity.
+
+
+(b) What happens if you use the option `position = "fill"` in the plot above?
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = clarity, fill = cut, position = "fill"))
+```
+The code executed and shows an identical graph, but the console says it ignores position.
+
+# Problem 2
+
+In this problem you will use the `midwest` dataset, also available with the `ggplot2` package. The data comes from the 2000 US Census. Learn more about the `midwest` dataset here
+
+```{r}
+str(midwest)
+```
+
+(a) Create a scatterplot showing the relationship between the variables `area` (in the horizontal axis) and `poptotal` (in the vertical axis)
+
+```{r}
+ggplot(data = midwest) +
+  geom_point(mapping = aes(x = area, y = poptotal))
+```
+
+(b) Color your points based on the variable `state` (information on 5 different states is included in this dataset). Additionally, size your points based on the variable `popdensity`. Do any points stand out from the rest?
+
+```{r}
+ggplot(data = midwest) +
+  geom_point(mapping = aes(x = area, y = poptotal, color = state))
+```
+
+
+(c) Use the `labs()` layers to add a title and caption, and edit the x-label and y-label.
+
+```{r}
+ggplot(data = midwest) +
+  geom_point(mapping = aes(x = area, y = poptotal, color = state)) + 
+  labs(title = "Total Population by Districts", xlabel = "District", ylabel = "Total Population", caption = "Scatterplot of population by district for the midwest states")
+```
+
+
+(d) How would you limit the range of the variables `area` to the interval $[0, 0.1]$ and `poptotal` to $[0, 500000]$.? Comment on your results.
+
+```{r}
+ggplot(data = filter(midwest, area <= 0.1 & poptotal <= 500000)) +
+  geom_point(mapping = aes(x = area, y = poptotal, color = state)) + 
+  labs(title = "Total Population by Districts", xlabel = "District", ylabel = "Total Population", caption = "Scatterplot of population by district for the midwest states")
+```
+When we apply the filter (which only requires the less than or equal to, as all values are positive numbers), we can see that this graph now has the points spread out more.
+
+(e) Create a plot to explore the answer to the question: _Is there a relationship between percent of population below the poverty level (`percbelowpoverty`) and the type of area (`inmetro`)?_ 
+
+```{r}
+ggplot(data = midwest) + 
+  geom_point(mapping = aes(x = state, y = percbelowpoverty, color = inmetro))
+```
+```{r}
+ggplot(data = midwest) + 
+  geom_point(mapping = aes(x = inmetro, y = percbelowpoverty, color = state))
+```
+I made 2 graphs and added the states each are is from. In both, we can see that more often, areas outside of metro will be in poverty, but there isn't much correlation. 
+
+
+# Problem 3
+
+Load the `gapminder` package 
+
+```{r}
+library(gapminder)
+```
+
+
+> if you have not installed this yet, make sure you install it, by typing `install.packages("gapminder")` in the `Console`, or using the `Install` button in the `Packages` tab in RStudio
+
+
+(a) Recreate the scatterplot (with the linear fit) shown in [Figure 3.13](https://socviz.co/makeplot.html#makeplot) of Kieran Healy's Data Visualization book:
+
+```{r, echo = F, warning=FALSE, fig.align='center'}
+knitr::include_graphics("https://socviz.co/dataviz-pdfl_files/figure-html4/ch-03-fig-lexp-gdp-10-1.png")
+```
+
+```{r}
+str(gapminder)
+```
+
+```{r}
+gapminder
+```
+
+
+```{r}
+p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y=lifeExp))
+p + geom_point(alpha = 0.3) +
+    geom_smooth(method = "gam") +
+    scale_x_log10(labels = scales::dollar) +
+    labs(x = "GDP Per Capita", y = "Life Expectancy in Years",
+         title = "Economic Growth and Life Expectancy",
+         subtitle = "Data points are country-years",
+         caption = "Source: Gapminder.")
+```
+This seems to be an expanded version of the graph that for some reason was cut off.
+
+(b)  Is the figure above the best way to display this country-year data? What are we gaining and losing by ignoring the temporal and country-level structure of the data?
+
+This is definitely not the best way to display the country-year data. Firstly, there is no colors to represent anything besides the line. By ignoring the temporal and country-level structure, you lose out on many details as well. However, you also gain some simplicity and a view of the overall data.
+
+(c) Pick 6 countries of your choice included in the `gapminder` dataset. Create a plot with life expectancy in years in the vertical axis, and GDP per capita in the horizontal axes. For each country include a regression line (`method = "lm"` in `geom_smooth()`). _Comment on your results._ 
+
+```{r}
+d <- ggplot(data = filter(gapminder, country == "Japan" | country == "Russia" | country == "France" | country == "India" | country == "Mexico" | country == "Chad"), mapping = aes(x = gdpPercap, y=lifeExp, color = country))
+d + geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm") +
+    scale_x_log10(labels = scales::dollar) +
+    labs(x = "GDP Per Capita", y = "Life Expectancy in Years",
+         title = "Economic Growth and Life Expectancy",
+         subtitle = "Data points are country-years",
+         caption = "Source: Gapminder.")
+```
+
+This graph is more appealing to the eyes and also is a smaller scope that looks at a few countries. This ends up being better for comparisons between these 6 countries.
+
+# Problem 4
+
+In this problem, you will use the `BostonHousing.csv` dataset available [here](https://github.com/reisanar/datasets/blob/master/BostonHousing.csv). It contains information concerning housing in the area of Boston, Massachusetts. The dataset includes information on 506 census housing tracts in the Boston area. 
+
+
+
+  Variables |  Description
+------------|----------------------------------------------------------------
+`CRIM`      | Crime rate
+`ZN`        | Percentage of residential land zoned for lots over 25,000 ft2
+`INDUS`     | Percentage of land occupied by non-retail business
+`CHAS`      | Does tract bound Charles River (`= 1` if tract bounds river, `= 0` otherwise)
+`NOX`       | Nitric oxide concentration (parts per 10 million)
+`RM`        | Average number of rooms per dwelling
+`AGE`       | Percentage of owner-occupied units built prior to 1940
+`DIS`       | Weighted distances to five Boston employment centers
+`RAD`       | Index of accessibility to radial highways
+`TAX`       | Full-value property tax rate per $10,000
+`PTRATIO`   | Pupil-to-teacher ratio by town
+`LSTAT`     | Percentage of lower status of the population
+`MEDV`      | Median value of owner-occupied homes in $1000s
+`CAT_MEDV`  | Is median value of owner-occupied homes in tract above $30,000 (`CAT.MEDV = 1`) or not (`CAT_MEDV = 0`)
+
+(a) Read the dataset and produce _at least one_ data summary of it (e.g. what is the variance and mean of every numerical attribute available?, what is the correlation between `PTRATIO` and `MEDV`?, etc.)
+
+```{r, message=FALSE, warning = FALSE}
+# read the data
+housing <- read_csv("https://raw.githubusercontent.com/reisanar/datasets/master/BostonHousing.csv")
+```
+
+```{r}
+summary(housing)
+```
+```{r}
+mean(housing$CRIM)
+```
+
+
+
+(b) Produce one data visualization to explore this dataset. Comment on your results.
+
+```{r}
+ggplot(data = filter(housing, CRIM >= mean(housing$CRIM)), aes(x = CRIM, y = AGE, color=TAX)) +
+  geom_point()
+```
+This is a graph that looks at the areas with above average crime rates, then compares the ages of the houses and the crime rates for those houses. You can also see the different Tax rates for each point. We can see that generally older houses will result in higher crime rates, and rarely will lower tax rates show for above average crime rate areas.
